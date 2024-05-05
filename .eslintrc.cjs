@@ -1,6 +1,28 @@
-/** @type { import("eslint").Linter.Config } */
+/** @type { import('eslint').Linter.Config } */
 module.exports = {
 	root: true,
+	rules: {
+		'@typescript-eslint/array-type': [
+			'error',
+			{
+				default: 'array-simple'
+			}
+		],
+		'@typescript-eslint/consistent-generic-constructors': 'error',
+		'@typescript-eslint/explicit-function-return-type': 'error',
+		'@typescript-eslint/no-unused-vars': [
+			'error',
+			{
+				argsIgnorePattern: '^_'
+			}
+		],
+		'no-restricted-imports': [
+			'error',
+			{
+				patterns: ['!*.css']
+			}
+		]
+	},
 	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
