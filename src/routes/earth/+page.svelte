@@ -4,8 +4,6 @@
 	import { Object3D } from 'three';
 	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-	const EARTH_TILT_ANGLE = 23.44;
-
 	let renderer: Three.WebGLRenderer;
 	let camera: Three.PerspectiveCamera;
 	const scene = new Three.Scene();
@@ -15,6 +13,7 @@
 	onMount(() => {
 		initializeRendererAndCamera();
 		loadGLTFModel();
+		addAxisHelper();
 	});
 
 	function initializeRendererAndCamera(): void {
@@ -28,7 +27,7 @@
 			0.1,
 			2000
 		);
-		camera.position.set(0, -10, 25);
+		camera.position.set(0, 0, 25);
 	}
 
 	function loadGLTFModel(): void {
@@ -36,8 +35,10 @@
 		loader.load(
 			'src/lib/resources/models/earth/scene.gltf',
 			(gltf) => {
-				gltf.scene.rotation.z = Three.MathUtils.degToRad(EARTH_TILT_ANGLE);
 				earthObject = gltf.scene;
+				center3dObject(earthObject);
+				const axesHelper = new Three.AxesHelper(20);
+				scene.add(axesHelper);
 				scene.add(earthObject);
 				// console.log(_dumpObject(earthObject).join('\n'));
 				requestAnimationFrame(render);
@@ -46,6 +47,11 @@
 				console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
 			}
 		);
+	}
+
+	function addAxisHelper(): void {
+		const axesHelper = new Three.AxesHelper(5);
+		scene.add(axesHelper);
 	}
 
 	function resizeCanvas(): void {
@@ -59,18 +65,17 @@
 		}
 	}
 
-	function render(time: number): void {
+	function render(): void {
 		resizeCanvas();
-		rotateEarth(time);
+		rotateEarth();
 		renderer.render(scene, camera);
 		requestAnimationFrame(render);
 	}
 
-	function rotateEarth(time: number): void {
-		time *= 0.001;
+	function rotateEarth(): void {
 		const rootNode = earthObject.getObjectByName('RootNode');
 		if (rootNode) {
-			rotateAroundObjectAxis(rootNode, new Three.Vector3(0, 0, 1), time / 5000);
+			rotateAroundObjectAxis(rootNode, new Three.Vector3(0, 0, 1), .02);
 		}
 	}
 
@@ -91,6 +96,12 @@
 			_dumpObject(child, lines, isLast, newPrefix);
 		});
 		return lines;
+	}
+
+	function center3dObject(object: Object3D): void {
+		const box = new Three.Box3().setFromObject(object);
+		const averageCoordinate = box.getCenter(object.position).negate();
+		object.position.set(averageCoordinate.x, averageCoordinate.y, averageCoordinate.z);
 	}
 </script>
 
